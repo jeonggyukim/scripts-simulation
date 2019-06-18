@@ -1,0 +1,46 @@
+#!/bin/bash
+#SBATCH --job-name=R4_2pc_L512_B10
+#SBATCH -N 5
+#SBATCH -n 128
+#SBATCH -t 06:00:00
+#SBATCH --mail-type=begin
+#SBATCH --mail-type=end
+#SBATCH --mail-user=kimjg@astro.princeton.edu
+#SBATCH --error=R4_2pc_L512_B10_%j.err
+#SBATCH --output=R4_2pc_L512_B10_%j.out
+#
+
+NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
+
+JOBID=R4_2pc_L512_B10.HII_only
+ATHINPUT=athinput.R4_2pc_L512_B10.HII_only
+ATHENA=athena-HII
+
+ATHENADIR=$HOME/athena-tigress-cooling
+INPUT=$ATHENADIR/athinput/TIGRESS-DIG/$ATHINPUT
+RUNDIR=/scratch/gpfs/$USER/TIGRESS-DIG/$JOBID
+
+# Create run directory
+if [ -d $RUNDIR ] ; then
+    rm -rf $RUNDIR/*
+else
+    mkdir -p $RUNDIR
+fi
+
+# Copy athena and athinput
+cp $ATHENADIR/bin/$ATHENA $RUNDIR/.
+cp $INPUT $RUNDIR/.
+cd $RUNDIR
+
+echo "Checking:"
+pwd
+
+echo "Time: $(date)"
+echo "Directory: $(pwd)"
+echo "Number of Processors: $NPROCS"
+
+module load intel intel-mpi fftw
+
+srun $ATHENA -i $ATHINPUT 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+# srun athena -i $ATHINPUT domain1/AutoWithNProc=$NPROCS 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+#srun athena -i $ATHINPUT job/problem_id=$JOBID domain1/AutoWithNProc=$NPROCS 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
