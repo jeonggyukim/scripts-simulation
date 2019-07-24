@@ -9,11 +9,11 @@ def rename_problem_id(basedir, problem_id_orig, problem_id_new,
     """Change problem_id of athena simulation output
     """
     files = glob.glob(os.path.join(basedir, '*/*.*'))
-
     for fname in files:
         if problem_id_orig in fname:
             fname_new = fname.replace('{0:s}.'.format(problem_id_orig),
                                       '{0:s}.'.format(problem_id_new))
+            print(fname,fname_new)
 
             os.rename(fname, fname_new)
             if verbose:

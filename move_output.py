@@ -1,42 +1,31 @@
 #!/usr/bin/env python
-
+#!/usr/bin/e
 import glob
 import os
 import argparse
 
-# problem_id_def = "R2_2pc_L256_B2"
-# suffix_def = "noHII.Z1.CR010.L100"
-
-problem_id_def = "R4_2pc_L512_B10"
-suffix_def = "HII_only"
-
-# problem_id_def = "M1_2pc_Tth50"
-# suffix_def = "noHII.Z2.CR010.L100.FUV_only"
+basedir_orig_def = "/scratch/gpfs/jk11/TIGRESS-RT/R4_8pc.CR2.radp"
+basedir_new_def = "/tigress/jk11/TIGRESS-RT/R4_8pc.CR2.radp"
 
 parser = argparse.ArgumentParser(
     description='''Move tigress simulation output files from gpfsto tigress using rsync. 
 To move vtk files, use join_vtk.sh script in Athena-TIGRESS/vtk''')
-
-parser.add_argument('--problem_id', type=str,
-                    default=problem_id_def,
-                    help='problem id')
-parser.add_argument('--suffix', type=str,
-                    default=suffix_def,
-                    help='suffix')
-
+parser.add_argument('--basedir_orig', type=str,
+                    default=basedir_orig_def,
+                    help='original basedir')
+parser.add_argument('--basedir_new', type=str,
+                    default=basedir_new_def,
+                    help='new basedir')
+parser.add_argument('--join_vtk',
+                    action='store_true', default=False,
+                    help='Toggle to join vtk files')
 args = vars(parser.parse_args())
 locals().update(args)
-
-model = "{0:s}.{1:s}".format(problem_id, suffix)
-basedir_orig = "/scratch/gpfs/jk11/TIGRESS-DIG/{0:s}".format(model)
-#basedir_new = "/projects/EOSTRIKE/TIGRESS_XCO_ART/{0:s}".format(model)
-basedir_new = "/tigress/jk11/TIGRESS-DIG/{0:s}".format(model)
 
 basedir_orig_id0 = os.path.join(basedir_orig, 'id0', '') # add trailing slash
 
 print('basedir_orig: ', basedir_orig)
 print('basedir_new: ', basedir_new)
-print('problem_id: ', problem_id)
 
 if not os.path.isdir(basedir_orig):
     raise IOError('basedir_orig does not exist: ', basedir_orig)

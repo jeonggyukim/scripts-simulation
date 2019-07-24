@@ -12,9 +12,9 @@
 
 NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
 
-JOBID=M1_2pc_Tth50.noHII.Z2.CR010.L100.FUV_only
+JOBID=M1_2pc_Tth50.noHII.Z2.CR010.L100.FUV_only.eps8.expexact
 ATHINPUT=athinput.M1_2pc_Tth50
-ATHENA=athena-FUV
+ATHENA=radps_postproc_FUV
 
 ATHENADIR=$HOME/athena-tigress-cooling
 INPUT=$ATHENADIR/athinput/TIGRESS-XCO/$ATHINPUT

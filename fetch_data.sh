@@ -3,7 +3,7 @@
 model=R4_2pc_L512_B10
 start=100
 end=300
-step=10
+step=1
 
 datadir="/tigress/changgoo/${model}"
 outdir="/tigress/${USER}/TIGRESS-DIG/${model}"
@@ -71,9 +71,8 @@ if [[ ! -f ${parfile} ]]; then
 fi
 
 ## Join vtk files using bash wrapper
-join=$HOME/athena-tigress-cooling/vtk/join.sh
+join=./vtk/join.sh
 $join -i $datadir -o $outdir -r $start:$end:$step
-
 
 ## join vtk using parallel python wrapper for join.sh
 #joinpy=$HOME/athena-tigress/vtk/join_parallel.py
