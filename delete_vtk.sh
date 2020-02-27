@@ -3,12 +3,12 @@
 # Delete id-*.????.vtk files in gpfs
 # Use after vtk files are joined.
 
-START=40
-END=60
+START=0
+END=400
 STEP=1
 
-BASEDIR="/scratch/gpfs/${USER}/radps_postproc/R8_2pc_rst.xymax1024_2"
-PROBLEM_ID="R8_2pc_rst"
+BASEDIR="/scratch/gpfs/${USER}/TIGRESS-RT/R4_4pc.RT.nowind"
+PROBLEM_ID="R4"
 
 printf "Base directory: %s\n" "${BASEDIR}"
 printf "Delete vtk files: "

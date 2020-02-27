@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+#SBATCH --job-name=fbtest
+#SBATCH -N 1
+#SBATCH -n 16
+#SBATCH -t 00:30:00
+#SBATCH --error=fbtest_%j.err
+#SBATCH --output=fbtest_%j.out
+#
+
+NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
+
+JOBID=TIGRESS.modified.roe.vl.n5000.N128.oldcool
+ATHINPUT=athinput.test.n50_hyb
+ATHENA=feedback_test
+
+ATHENADIR=$HOME/atl2
+INPUT=$ATHENADIR/athinput/FEEDBACK-TEST/$ATHINPUT
+RUNDIR=/scratch/gpfs/$USER/FEEDBACK-TEST/$JOBID
+
+# Create run directory
+if [ -d $RUNDIR ] ; then
+    rm -rf $RUNDIR/*
+else
+    mkdir -p $RUNDIR
+fi
+
+# Copy athena and athinput
+cp $ATHENADIR/bin/$ATHENA $RUNDIR/.
+cp $INPUT $RUNDIR/.
+cd $RUNDIR
+
+echo "Checking:"
+pwd
+
+echo "Time: $(date)"
+echo "Directory: $(pwd)"
+echo "Number of Processors: $NPROCS"
+
+module load intel intel-mpi fftw
+#module load fftw/gcc/openmpi-1.10.2/3.3.4 openmpi/gcc/1.10.2/64
+
+srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=16 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+#srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=64 time/tlim=2.0 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+
+# srun $ATHENA -i $ATHINPUT domain1/x1min=-0.32 domain1/x1max=0.32 domain1/x2min=-0.32 domain1/x2max=0.32 domain1/x3min=-0.32 domain1/x3max=0.32 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+# srun $ATHENA -i $ATHINPUT domain1/Nx1=128 domain1/Nx2=128 domain1/Nx3=128 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+#srun athena -i $ATHINPUT job/problem_id=$JOBID domain1/AutoWithNProc=$NPROCS 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt

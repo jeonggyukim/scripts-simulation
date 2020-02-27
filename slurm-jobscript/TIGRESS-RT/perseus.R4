@@ -1,19 +1,19 @@
-#!/bin/bash
-#SBATCH --job-name=R4_8pc.radp
-#SBATCH -N 4
-#SBATCH -n 112
+#!/usr/bin/env bash
+#SBATCH --job-name=R4_4pc.RT
+#SBATCH -N 16
+#SBATCH -n 448
 #SBATCH -t 48:00:00
+#SBATCH --mail-user=kimjg@astro.princeton.edu
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
-#SBATCH --mail-user=kimjg@astro.princeton.edu
-#SBATCH --error=R4_8pc_%j.err
-#SBATCH --output=R4_8pc_%j.out
+#SBATCH --error=R4_4pc_%j.err
+#SBATCH --output=R4_4pc_%j.out
 #
 
 NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
 
-JOBID=R4_8pc.CR2.radp3.tdecay40
-ATHINPUT=athinput.R4
+JOBID=R4_4pc.RT.nowind
+ATHINPUT=athinput.R4_4pc
 ATHENA=tigress_rt_newcool
 
 ATHENADIR=$HOME/athena-tigress-cooling
@@ -40,6 +40,7 @@ echo "Directory: $(pwd)"
 echo "Number of Processors: $NPROCS"
 
 module load intel intel-mpi fftw
+#module load fftw/gcc/openmpi-1.10.2/3.3.4 openmpi/gcc/1.10.2/64
 
 srun $ATHENA -i $ATHINPUT 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
 #srun athena -i $ATHINPUT domain1/AutoWithNProc=64 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt

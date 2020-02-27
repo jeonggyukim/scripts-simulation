@@ -1,24 +1,24 @@
 #!/bin/bash
-#SBATCH --job-name=R4_2pc_L512_B10
+#SBATCH --job-name=M1_2pc.FUV
 #SBATCH -N 5
 #SBATCH -n 128
-#SBATCH -t 00:10:00
+#SBATCH -t 00:30:00
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH --mail-user=kimjg@astro.princeton.edu
-#SBATCH --error=R4_2pc_L512_B10_%j.err
-#SBATCH --output=R4_2pc_L512_B10_%j.out
+#SBATCH --error=M1_2pc.FUV_%j.err
+#SBATCH --output=M1_2pc.FUV_%j.out
 #
 
 NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
 
-JOBID=R4_2pc_L512_B10.HII_only
-ATHINPUT=athinput.R4_2pc_L512_B10.HII_only
-ATHENA=athena-HII
+JOBID=M1_2pc.FUV.Z2
+ATHINPUT=athinput.M1_2pc
+ATHENA=radps_postproc
 
 ATHENADIR=$HOME/athena-tigress-cooling
-INPUT=$ATHENADIR/athinput/TIGRESS-DIG/$ATHINPUT
-RUNDIR=/scratch/gpfs/$USER/TIGRESS-DIG/$JOBID
+INPUT=$ATHENADIR/athinput/radps_postproc/$ATHINPUT
+RUNDIR=/scratch/gpfs/$USER/radps_postproc/$JOBID
 
 # Create run directory
 if [ -d $RUNDIR ] ; then

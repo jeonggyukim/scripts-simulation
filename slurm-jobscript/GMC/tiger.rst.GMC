@@ -1,0 +1,59 @@
+#!/bin/bash
+#SBATCH --job-name=gmc.M1E5R20.R.B0.02
+#SBATCH -N 1
+##SBATCH --ntasks-per-node=40
+#SBATCH -n 8
+#SBATCH -t 00:30:00
+#SBATCH --mail-type=begin
+#SBATCH --mail-type=end
+#SBATCH --mail-user=kimjg@astro.princeton.edu
+#SBATCH --error=gmc_%j.err
+#SBATCH --output=gmc_%j.out
+#
+
+# NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
+NPROCS=8
+
+PROBLEM_ID=gmc
+RST_STEP=0008
+
+RSTDIR=/scratch/gpfs/jk11/GMC/M1E5R20.R.Binf.A2.N64.np8
+RUNDIR=/scratch/gpfs/jk11/GMC/M1E5R20.R.Binf.A2.N64.np8.rst3
+EXECUTABLE=sf_cloud
+
+echo "Preparing:"
+
+if [ ! -d $RUNDIR ]; then
+    mkdir -p $RUNDIR
+fi
+
+if [ ${RSTDIR} != ${RUNDIR} ]; then
+#    cp /home/jk11/athena-gmc/bin/$EXECUTABLE $RUNDIR/.
+    cp $RSTDIR/$EXECUTABLE $RUNDIR/.
+fi
+
+cd $RUNDIR
+
+[[ -d rst ]] || mkdir rst
+for d in $(find ${RSTDIR} -maxdepth 1 -type d -name 'id*') ; do
+#for d in $(find ${RSTDIR} -maxdepth 1 -type d -name 'rst') ; do
+    echo ${d}
+    cp ${d}/${PROBLEM_ID}*${RST_STEP}.rst ./rst/
+done
+#cp $RSTDIR/rst/${PROBLEM_ID}*${RST_STEP}.rst ./rst/ 
+
+echo "Checking:"
+pwd
+
+echo Time is `date`
+echo Directory is `pwd`
+echo Number of Processors is $NPROCS
+
+module load intel intel-mpi fftw
+
+srun ./$EXECUTABLE -r ${RUNDIR}/rst/${PROBLEM_ID}.${RST_STEP}.rst 1> $RUNDIR/out2.txt 2> $RUNDIR/err2.txt
+
+echo "Stopping:"
+date
+
+echo "Done."

@@ -13,7 +13,7 @@
 # NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
 NPROCS=224
 
-PROBLEM=R2_2pc_L256_B2
+PROBLEM_ID=R2_2pc_L256_B2
 RST_STEP=0009
 
 JOBID_ORIG=R2_2pc_L256_B2
@@ -38,9 +38,9 @@ cp $EXECUTABLE $RUNDIR/.
 cd $RUNDIR
 
 [[ -d rst ]] || mkdir rst
-#for d in $(find ${RUNDIR_ORIG} -maxdepth 1 -type d -name 'id*') ; do cp ${d}/${PROBLEM}*${RST_STEP}.rst ./rst/ ; done;
+#for d in $(find ${RUNDIR_ORIG} -maxdepth 1 -type d -name 'id*') ; do cp ${d}/${PROBLEM_ID}*${RST_STEP}.rst ./rst/ ; done;
 
-# cp $RSTDIR/${PROBLEM}*${RST_STEP}.rst ./rst/ 
+# cp $RSTDIR/${PROBLEM_ID}*${RST_STEP}.rst ./rst/ 
 
 echo "Checking:"
 pwd
@@ -51,9 +51,9 @@ echo Number of Processors is $NPROCS
 
 module load intel intel-mpi fftw
 
-srun $EXECUTABLE -r ${RUNDIR}/rst/${PROBLEM}.${RST_STEP}.rst 1> $RUNDIR/log.txt 2> $RUNDIR/err.txt
+srun $EXECUTABLE -r ${RUNDIR}/rst/${PROBLEM_ID}.${RST_STEP}.rst 1> $RUNDIR/log.txt 2> $RUNDIR/err.txt
 
-# srun $mpirun -np $NPROCS $EXECUTABLE -r ${RUNDIR}/rst/${PROBLEM}.${RST_STEP}.rst 1> $RUNDIR/log.txt 2> $RUNDIR/err.txt
+# srun $mpirun -np $NPROCS $EXECUTABLE -r ${RUNDIR}/rst/${PROBLEM_ID}.${RST_STEP}.rst 1> $RUNDIR/log.txt 2> $RUNDIR/err.txt
 
 echo "Stopping:"
 date

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+#SBATCH --job-name=R8_2pc_rst
+#SBATCH -N 8
+#SBATCH -n 224
+#SBATCH -t 48:00:00
+#SBATCH --mail-type=begin
+#SBATCH --mail-type=end
+#SBATCH --mail-user=kimjg@astro.princeton.edu
+#SBATCH --error=R8_2pc_rst_%j.err
+#SBATCH --output=R8_2pc_rst_%j.out
+#
+
+NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
+
+JOBID=R8_2pc_rst.xymax2048.eps10
+ATHINPUT=athinput.R8_2pc_rst
+ATHENA=radps_postproc_FUV
+
+ATHENADIR=$HOME/athena-tigress-cooling
+INPUT=$ATHENADIR/athinput/radps_postproc/$ATHINPUT
+RUNDIR=/scratch/gpfs/$USER/radps_postproc/$JOBID
+
+# Create run directory
+if [ -d $RUNDIR ] ; then
+    rm -rf $RUNDIR/*
+else
+    mkdir -p $RUNDIR
+fi
+
+# Copy athena and athinput
+cp $ATHENADIR/bin/$ATHENA $RUNDIR/.
+cp $INPUT $RUNDIR/.
+cd $RUNDIR
+
+echo "Checking:"
+pwd
+
+echo "Time: $(date)"
+echo "Directory: $(pwd)"
+echo "Number of Processors: $NPROCS"
+
+module load intel intel-mpi fftw
+
+srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=224 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt

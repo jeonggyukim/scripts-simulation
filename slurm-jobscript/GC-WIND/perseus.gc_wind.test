@@ -1,24 +1,24 @@
-#!/bin/bash
-#SBATCH --job-name=R4_2pc_L512_B10
-#SBATCH -N 5
-#SBATCH -n 128
+#!/usr/bin/env bash
+#SBATCH --job-name=gc_wind
+#SBATCH -N 3
+#SBATCH -n 64
 #SBATCH -t 00:10:00
+#SBATCH --mail-user=kimjg@astro.princeton.edu
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
-#SBATCH --mail-user=kimjg@astro.princeton.edu
-#SBATCH --error=R4_2pc_L512_B10_%j.err
-#SBATCH --output=R4_2pc_L512_B10_%j.out
+#SBATCH --error=gc_wind_%j.err
+#SBATCH --output=gc_wind_%j.out
 #
 
 NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
 
-JOBID=R4_2pc_L512_B10.HII_only
-ATHINPUT=athinput.R4_2pc_L512_B10.HII_only
-ATHENA=athena-HII
+JOBID=test-hllc-alpha0-Nx64
+ATHINPUT=athinput.test
+ATHENA=gc_wind
 
-ATHENADIR=$HOME/athena-tigress-cooling
-INPUT=$ATHENADIR/athinput/TIGRESS-DIG/$ATHINPUT
-RUNDIR=/scratch/gpfs/$USER/TIGRESS-DIG/$JOBID
+ATHENADIR=$HOME/athena-tigress-gcwind
+INPUT=$ATHENADIR/athinput/GC_WIND/$ATHINPUT
+RUNDIR=/scratch/gpfs/$USER/GC_WIND/$JOBID
 
 # Create run directory
 if [ -d $RUNDIR ] ; then
@@ -40,7 +40,8 @@ echo "Directory: $(pwd)"
 echo "Number of Processors: $NPROCS"
 
 module load intel intel-mpi fftw
+#module load fftw/gcc/openmpi-1.10.2/3.3.4 openmpi/gcc/1.10.2/64
 
 srun $ATHENA -i $ATHINPUT 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
-# srun athena -i $ATHINPUT domain1/AutoWithNProc=$NPROCS 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+#srun athena -i $ATHINPUT domain1/AutoWithNProc=64 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
 #srun athena -i $ATHINPUT job/problem_id=$JOBID domain1/AutoWithNProc=$NPROCS 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt

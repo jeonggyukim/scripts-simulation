@@ -4,14 +4,20 @@ import glob
 import os
 import argparse
 
-basedir_orig_def = "/scratch/gpfs/jk11/TIGRESS-RT/R4_8pc.CR2.radp"
-basedir_new_def = "/tigress/jk11/TIGRESS-RT/R4_8pc.CR2.radp"
-join_vtk_def = False
-sync_rst_def = False
+basedir_orig_def = "/scratch/gpfs/jk11/radps_postproc/R8_2pc_rst.xymax2048.eps10"
+#basedir_orig_def = "/scratch/gpfs/jk11/TIGRESS-RT/R4_4pc.RT.nowind"
+#basedir_new_def = "/tigress/jk11/TIGRESS-RT/R8_4pc.RT.wind"
+#basedir_new_def = "/tigress/jk11/TIGRESS-RT/R4_4pc.RT.wind"
+basedir_new_def = "/tigress/jk11/TIGRESS-DIG/R8_2pc_rst.xymax2048.eps10"
+#basedir_new_def = "/projects/EOSTRIKE/TIGRESS-RT/R4_4pc.RT.wind"
+
+sync_rst_def = True
+join_vtk_def = True
 
 parser = argparse.ArgumentParser(
     description='''Move tigress simulation output files from gpfsto tigress
 using rsync. To move vtk files, use vtk/join_vtk.sh script''')
+
 parser.add_argument('--basedir_orig', type=str,
                     default=basedir_orig_def,
                     help='original basedir')
@@ -24,6 +30,7 @@ parser.add_argument('--join_vtk',
 parser.add_argument('--sync_rst',
                     action='store_true', default=sync_rst_def,
                     help='Toggle to join vtk files')
+
 args = vars(parser.parse_args())
 locals().update(args)
 
@@ -55,7 +62,7 @@ for d in (basedir_new_hst, basedir_new_vtk, \
 
 rsync_id0 = 'rsync -av {0:s} {1:s}'.format(basedir_orig_id0, basedir_new)
 
-rsync_hst = 'rsync -av --include="*.hst" --exclude="*" {0:s} {1:s}'.\
+rsync_hst = 'rsync -av --include="*.sn" --include="*.hst" --exclude="*" {0:s} {1:s}'.\
                                   format(basedir_orig_id0, basedir_new_hst)
 rsync_zprof = 'rsync -av --include="*.zprof" --exclude="*" {0:s} {1:s}'.\
                                     format(basedir_orig_id0, basedir_new_zprof)
@@ -63,7 +70,7 @@ rsync_star = 'rsync -av --include="*.starpar.vtk" --exclude="*" {0:s} {1:s}'.\
                                    format(basedir_orig_id0, basedir_new_star)
 rsync_rst = 'rsync -av --include="*.rst" --exclude="*" {0:s}/id*/ {1:s}'.\
                                    format(basedir_orig, basedir_new_rst)
-rsync_misc = 'rsync -av  --include="athinput*" --include="athena*" --include="radps_postproc*" --include="tigress*" --include="*.txt" ' + \
+rsync_misc = 'rsync -av --include="snapshots" --include="prj*" --include="slc*"  --include="athinput*" --include="athena*" --include="radps_postproc*" --include="tigress*" --include="*.txt" ' + \
                                     '--exclude="*" {0:s} {1:s}'.\
                                     format(os.path.join(basedir_orig, ''), basedir_new)
 

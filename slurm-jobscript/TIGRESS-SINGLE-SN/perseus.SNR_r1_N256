@@ -12,9 +12,9 @@
 
 NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
 
-JOBID=SNR_r1_N256.newcool.fcool10-fastexplogpow-further-optimization
+JOBID=SNR_r1_N128
 ATHINPUT=athinput.snr_iso
-ATHENA=tigress-single-sn-newcool
+ATHENA=tigress_single_sn
 
 ATHENADIR=$HOME/athena-tigress-cooling
 INPUT=$ATHENADIR/athinput/snr/$ATHINPUT

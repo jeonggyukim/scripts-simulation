@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#SBATCH --job-name=M1E5R20.R.Binf.A2
+#SBATCH -N 3
+#SBATCH -n 64
+#SBATCH -t 00:01:00
+#SBATCH --mail-user=kimjg@astro.princeton.edu
+#SBATCH --mail-type=begin
+#SBATCH --mail-type=end
+#SBATCH --error=sf_cloud_%j.err
+#SBATCH --output=sf_cloud_%j.out
+#
+
+#NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
+NPROCS=64
+
+JOBID=M1E5R20.R.Binf.A2.N128.new3
+ATHINPUT=athinput.test
+
+ATHENA=sf_cloud
+
+ATHENADIR=$HOME/Athena-TIGRESS
+INPUT=$ATHENADIR/athinput/GMC/$ATHINPUT
+RUNDIR=/scratch/gpfs/$USER/GMC/$JOBID
+
+# Create run directory
+if [ -d $RUNDIR ] ; then
+    rm -rf $RUNDIR/*
+else
+    mkdir -p $RUNDIR
+fi
+
+# Copy athena and athinput
+cp $ATHENADIR/bin/$ATHENA $RUNDIR/.
+cp $INPUT $RUNDIR/.
+cd $RUNDIR
+
+echo "Checking:"
+pwd
+
+echo "Time: $(date)"
+echo "Directory: $(pwd)"
+echo "Number of Processors: $NPROCS"
+
+module load intel intel-mpi fftw
+srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=$NPROCS 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt

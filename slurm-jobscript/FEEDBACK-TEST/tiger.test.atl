@@ -1,0 +1,47 @@
+#!/bin/bash
+#SBATCH --job-name=fbtest
+#SBATCH -N 13
+##SBATCH --ntasks-per-node=16
+#SBATCH -n 512
+#SBATCH -t 00:30:00
+#SBATCH --mail-type=begin
+#SBATCH --mail-type=end
+#SBATCH --mail-user=kimjg@astro.princeton.edu
+#SBATCH --error=fbtest_%j.err
+#SBATCH --output=fbtest_%j.out
+#
+
+NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
+
+JOBID=Vanilla.roe.vl.n5000.N128.newcool.dmin0.csmin0
+ATHINPUT=athinput.test.n50_hyb
+
+ATHENA=feedback_test
+
+ATHENADIR=$HOME/Athena-TIGRESS-gc-wind-van
+INPUT=$ATHENADIR/athinput/FEEDBACK-TEST/$ATHINPUT
+RUNDIR=/scratch/gpfs/$USER/FEEDBACK-TEST/$JOBID
+
+# Create run directory
+if [ -d $RUNDIR ] ; then
+    rm -rf $RUNDIR/*
+else
+    mkdir -p $RUNDIR
+fi
+
+# Copy athena and athinput
+cp $ATHENADIR/bin/$ATHENA $RUNDIR/.
+cp $INPUT $RUNDIR/.
+cd $RUNDIR
+
+echo "Checking:"
+pwd
+
+echo "Time: $(date)"
+echo "Directory: $(pwd)"
+echo "Number of Processors: $NPROCS"
+
+module load intel intel-mpi fftw
+#module load fftw/gcc/openmpi-1.10.2/3.3.4 openmpi/gcc/1.10.2/64
+
+srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=512 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt

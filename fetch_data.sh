@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 
-model=R4_2pc_L512_B10
-start=100
-end=300
+model=R8_2pc_rst
+start=285
+end=448
 step=1
 
 datadir="/tigress/changgoo/${model}"
-outdir="/tigress/${USER}/TIGRESS-DIG/${model}"
+outdir="/tigress/${USER}/radps_postproc/${model}"
 
 ################################################################
 
@@ -70,9 +70,9 @@ if [[ ! -f ${parfile} ]]; then
     echo "[Warning]: Couldn't find restart files or out.txt"
 fi
 
-## Join vtk files using bash wrapper
-join=./vtk/join.sh
-$join -i $datadir -o $outdir -r $start:$end:$step
+# ## Join vtk files using bash wrapper
+# join=./vtk/join.sh
+# $join -i $datadir -o $outdir -r $start:$end:$step
 
 ## join vtk using parallel python wrapper for join.sh
 #joinpy=$HOME/athena-tigress/vtk/join_parallel.py

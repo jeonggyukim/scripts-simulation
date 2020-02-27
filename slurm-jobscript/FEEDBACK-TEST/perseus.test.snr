@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#SBATCH --job-name=fbtest
+#SBATCH -N 3
+#SBATCH -n 64
+#SBATCH -t 00:03:00
+#SBATCH --mail-user=kimjg@astro.princeton.edu
+#SBATCH --mail-type=begin
+#SBATCH --mail-type=end
+#SBATCH --error=fbtest_%j.err
+#SBATCH --output=fbtest_%j.out
+#
+
+NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
+
+JOBID=snr.np64.fix
+ATHINPUT=athinput.snr_iso
+ATHENA=tigress_single_sn
+
+ATHENADIR=$HOME/athena-tigress-cooling
+INPUT=$ATHENADIR/athinput/snr/$ATHINPUT
+RUNDIR=/scratch/gpfs/$USER/snr/$JOBID
+
+# Create run directory
+if [ -d $RUNDIR ] ; then
+    rm -rf $RUNDIR/*
+else
+    mkdir -p $RUNDIR
+fi
+
+# Copy athena and athinput
+cp $ATHENADIR/bin/$ATHENA $RUNDIR/.
+cp $INPUT $RUNDIR/.
+cd $RUNDIR
+
+echo "Checking:"
+pwd
+
+echo "Time: $(date)"
+echo "Directory: $(pwd)"
+echo "Number of Processors: $NPROCS"
+
+module load intel intel-mpi fftw
+#module load fftw/gcc/openmpi-1.10.2/3.3.4 openmpi/gcc/1.10.2/64
+
+srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=64 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+#srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=64 time/tlim=2.0 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+
+# srun $ATHENA -i $ATHINPUT domain1/x1min=-0.32 domain1/x1max=0.32 domain1/x2min=-0.32 domain1/x2max=0.32 domain1/x3min=-0.32 domain1/x3max=0.32 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+# srun $ATHENA -i $ATHINPUT domain1/Nx1=128 domain1/Nx2=128 domain1/Nx3=128 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+#srun athena -i $ATHINPUT job/problem_id=$JOBID domain1/AutoWithNProc=$NPROCS 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
