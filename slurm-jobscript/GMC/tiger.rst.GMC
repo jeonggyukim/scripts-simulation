@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=gmc.M1E5R20.R.B0.02
-#SBATCH -N 1
+#SBATCH -N 2
 ##SBATCH --ntasks-per-node=40
-#SBATCH -n 8
+#SBATCH -n 64
 #SBATCH -t 00:30:00
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
@@ -10,15 +10,14 @@
 #SBATCH --error=gmc_%j.err
 #SBATCH --output=gmc_%j.out
 #
-
 # NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
-NPROCS=8
+NPROCS=64
 
 PROBLEM_ID=gmc
 RST_STEP=0008
 
-RSTDIR=/scratch/gpfs/jk11/GMC/M1E5R20.R.Binf.A2.N64.np8
-RUNDIR=/scratch/gpfs/jk11/GMC/M1E5R20.R.Binf.A2.N64.np8.rst3
+RSTDIR=/scratch/gpfs/jk11/GMC/M1E5R20.R.Binf.A2.N128.new4
+RUNDIR=/scratch/gpfs/jk11/GMC/M1E5R20.R.Binf.A2.N128.new4.rst
 EXECUTABLE=sf_cloud
 
 echo "Preparing:"

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #SBATCH --job-name=M1E5R20.R.Binf.A2
-#SBATCH -N 3
-#SBATCH -n 64
-#SBATCH -t 00:01:00
+#SBATCH -N 8
+#SBATCH -n 216
+#SBATCH -t 06:00:00
 #SBATCH --mail-user=kimjg@astro.princeton.edu
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
@@ -11,9 +11,9 @@
 #
 
 #NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
-NPROCS=64
+NPROCS=216
 
-JOBID=M1E5R20.R.Binf.A2.N128.new3
+JOBID=M1E5R20.R.Binf.A2.S1.N256
 ATHINPUT=athinput.test
 
 ATHENA=sf_cloud
@@ -41,5 +41,14 @@ echo "Time: $(date)"
 echo "Directory: $(pwd)"
 echo "Number of Processors: $NPROCS"
 
+# Clear the environment from any previously loaded modules
+module purge > /dev/null 2>&1
 module load intel intel-mpi fftw
-srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=$NPROCS 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+
+srun $ATHENA -i $ATHINPUT domain1/Nx1=256 domain1/Nx2=256 domain1/Nx3=256 domain1/AutoWithNProc=$NPROCS feedback/iSN=0 feedback/iWind=0 time/tlim=15.0 problem/theta_B0=0.0 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+
+# srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=$NPROCS feedback/iSN=0 feedback/iWind=0 time/tlim=20.0 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+
+# srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=$NPROCS feedback/iSN=0 feedback/iWind=0 time/tlim=20.0 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+
+wait

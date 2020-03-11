@@ -12,7 +12,7 @@
 
 NPROCS="$(($SLURM_NNODES * $SLURM_CPUS_ON_NODE))"
 
-JOBID=yesH2.noH2pump.W95abd.Z001.dT004
+JOBID=Unshielded.yesH2.yesH2pump.Z1.dlnT0.04.again
 ATHINPUT=athinput.srtest
 ATHENA=sixray_test
 
@@ -20,7 +20,7 @@ ATHENA=sixray_test
 # ATHINPUT=athinput.srtest_PDR
 # ATHENA=sixray_test
 
-ATHENADIR=$HOME/athena-tigress-cooling
+ATHENADIR=$HOME/Athena-TIGRESS
 INPUT=$ATHENADIR/athinput/NEWCOOL/$ATHINPUT
 RUNDIR=/scratch/gpfs/$USER/NEWCOOL/$JOBID
 
@@ -46,7 +46,7 @@ echo "Number of Processors: $NPROCS"
 module load intel intel-mpi fftw
 #module load fftw/gcc/openmpi-1.10.2/3.3.4 openmpi/gcc/1.10.2/64
 
-srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=64 problem/Z_gas=0.01 problem/Z_dust=0.01 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
+srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=64 problem/Z_gas=1 problem/Z_dust=1 cooling/f_cool=0.01 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
 
 #srun $ATHENA -i $ATHINPUT domain1/AutoWithNProc=64 time/tlim=2.0 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
 # srun $ATHENA -i $ATHINPUT domain1/x1min=-0.32 domain1/x1max=0.32 domain1/x2min=-0.32 domain1/x2max=0.32 domain1/x3min=-0.32 domain1/x3max=0.32 1> $RUNDIR/out.txt 2> $RUNDIR/err.txt
