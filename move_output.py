@@ -2,83 +2,169 @@
 
 import glob
 import os
+import os.path as osp
 import argparse
 
-basedir_orig_def = "/scratch/gpfs/jk11/radps_postproc/R8_2pc_rst.xymax2048.eps10"
-#basedir_orig_def = "/scratch/gpfs/jk11/TIGRESS-RT/R4_4pc.RT.nowind"
-#basedir_new_def = "/tigress/jk11/TIGRESS-RT/R8_4pc.RT.wind"
-#basedir_new_def = "/tigress/jk11/TIGRESS-RT/R4_4pc.RT.wind"
-basedir_new_def = "/tigress/jk11/TIGRESS-DIG/R8_2pc_rst.xymax2048.eps10"
-#basedir_new_def = "/projects/EOSTRIKE/TIGRESS-RT/R4_4pc.RT.wind"
+basedir_orig_def = "/perseus/scratch/gpfs/jk11/GMC/M1E5R20.R.B2.A2.S1.N256"
+basedir_new_def = "/tigress/jk11/GMC/M1E5R20.R.B2.A2.S1.N256"
+join_vtk_script = "/tigress/jk11/scripts/vtk/join.sh"
 
-sync_rst_def = True
-join_vtk_def = True
+join_vtk_def = False
+join_vtk_suffix_def = False
+sync_rst_def = False
 
 parser = argparse.ArgumentParser(
     description='''Move tigress simulation output files from gpfsto tigress
 using rsync. To move vtk files, use vtk/join_vtk.sh script''')
 
-parser.add_argument('--basedir_orig', type=str,
+parser.add_argument('-i', '--basedir_orig', type=str,
                     default=basedir_orig_def,
                     help='original basedir')
-parser.add_argument('--basedir_new', type=str,
+parser.add_argument('-o', '--basedir_new', type=str,
                     default=basedir_new_def,
                     help='new basedir')
-parser.add_argument('--join_vtk',
+parser.add_argument('-j', '--join_vtk',
                     action='store_true', default=join_vtk_def,
-                    help='Toggle to join vtk files')
-parser.add_argument('--sync_rst',
+                    help='Toggle to (3d) join vtk files')
+parser.add_argument('-s', '--join_vtk_suffix',
+                    action='store_true', default=join_vtk_suffix_def,
+                    help='Toggle to join (2d) vtk files that have suffix')
+parser.add_argument('-r', '--sync_rst',
                     action='store_true', default=sync_rst_def,
-                    help='Toggle to join vtk files')
+                    help='Toggle to sync restart files')
 
 args = vars(parser.parse_args())
 locals().update(args)
 
-basedir_orig_id0 = os.path.join(basedir_orig, 'id0', '') # add trailing slash
+basedir_orig_id0 = osp.join(basedir_orig, 'id0', '') # add trailing slash
 
 print('basedir_orig: ', basedir_orig)
 print('basedir_new: ', basedir_new)
 
-if not os.path.isdir(basedir_orig):
+if not osp.isdir(basedir_orig):
     raise IOError('basedir_orig does not exist: ', basedir_orig)
 
-if os.path.isdir(basedir_new):
+if osp.isdir(basedir_new):
     print('New basedir {0:s} exists.'.format(basedir_new))
 else:
     print('Create new basedir {0:s}'.format(basedir_new))
     os.makedirs(basedir_new)
 
-basedir_new_hst = os.path.join(basedir_new, 'hst')
-basedir_new_star = os.path.join(basedir_new, 'starpar')
-basedir_new_zprof = os.path.join(basedir_new, 'zprof')
-basedir_new_rst = os.path.join(basedir_new, 'rst')
-basedir_new_vtk = os.path.join(basedir_new, 'vtk')
+basedir_new_sub = dict()
+basedir_new_sub['hst'] = osp.join(basedir_new, 'hst')
+basedir_new_sub['starpar'] = osp.join(basedir_new, 'starpar')
+basedir_new_sub['rst'] = osp.join(basedir_new, 'rst')
+basedir_new_sub['vtk'] = osp.join(basedir_new, 'vtk')
+if glob.glob(osp.join(basedir_new, 'id0', '*.zprof')):
+    basedir_new_sub['zprof'] = osp.join(basedir_new, 'zprof')
 
-for d in (basedir_new_hst, basedir_new_vtk, \
-          basedir_new_star, basedir_new_zprof, basedir_new_rst):
-    if not os.path.isdir(d):
+for k,d in basedir_new_sub.items():
+    if not osp.isdir(d):
         os.makedirs(d)
-        print('Create directory {0:s}'.format(d))
+        print('Create directory for {0:s}: {1:s}'.format(k,d))
 
 rsync_id0 = 'rsync -av {0:s} {1:s}'.format(basedir_orig_id0, basedir_new)
 
 rsync_hst = 'rsync -av --include="*.sn" --include="*.hst" --exclude="*" {0:s} {1:s}'.\
-                                  format(basedir_orig_id0, basedir_new_hst)
-rsync_zprof = 'rsync -av --include="*.zprof" --exclude="*" {0:s} {1:s}'.\
-                                    format(basedir_orig_id0, basedir_new_zprof)
-rsync_star = 'rsync -av --include="*.starpar.vtk" --exclude="*" {0:s} {1:s}'.\
-                                   format(basedir_orig_id0, basedir_new_star)
+                                  format(basedir_orig_id0, basedir_new_sub['hst'])
+rsync_star = 'rsync -av --include="*.starpar.vtk" --include="*.star" --exclude="*" {0:s} {1:s}'.\
+                                   format(basedir_orig_id0, basedir_new_sub['starpar'])
 rsync_rst = 'rsync -av --include="*.rst" --exclude="*" {0:s}/id*/ {1:s}'.\
-                                   format(basedir_orig, basedir_new_rst)
-rsync_misc = 'rsync -av --include="snapshots" --include="prj*" --include="slc*"  --include="athinput*" --include="athena*" --include="radps_postproc*" --include="tigress*" --include="*.txt" ' + \
-                                    '--exclude="*" {0:s} {1:s}'.\
-                                    format(os.path.join(basedir_orig, ''), basedir_new)
+                                   format(basedir_orig, basedir_new_sub['rst'])
+if 'zprof' in basedir_new_sub.keys():
+    rsync_zprof = 'rsync -av --include="*.zprof" --exclude="*" {0:s} {1:s}'.\
+                                        format(basedir_orig_id0, basedir_new_sub['zprof'])
+
+# rsync_misc = 'rsync -av --include="snapshots" --include="prj*" --include="slc*"  --include="athinput*" --include="athena*" --include="radps_postproc*" --include="tigress*" --include="*.txt" ' + '--exclude="*" {0:s} {1:s}'.format(osp.join(basedir_orig, ''), basedir_new)
+rsync_misc = 'rsync -av --exclude="id*" {0:s} {1:s}'.format(osp.join(basedir_orig, ''), basedir_new)
 
 # do not rsync id0 directory
-commands = [rsync_hst, rsync_zprof, rsync_star, rsync_misc]
-if sync_rst:
-    commands.append(rsync_rst)
+commands = [rsync_hst, rsync_star, rsync_misc]
+if 'zprof' in basedir_new_sub.keys():
+    commands.append(rsync_zprof)
 
 for c in commands:
     print(c)
     os.system(c)
+
+if join_vtk or join_vtk_suffix:
+    print('##################')
+    print('# join vtk files')
+    print('##################')
+
+    # Find all vtk files in id0 directory except for starpar.vtk
+    nums = dict()
+    nums['vtk'] = []
+    suffix = []
+    fvtk = glob.glob(osp.join(basedir_orig, 'id0', '*.vtk'))
+    for f in fvtk:
+        ff = osp.basename(f).split('.')
+        prefix = ff[0] # problem_id
+        try:
+            nums['vtk'].append(int(ff[-2]))
+        except ValueError:
+            suffix.append(ff[-2])
+
+    nums['vtk'] = sorted(nums['vtk'])
+    suffix = list(set(suffix))
+    suffix.remove('starpar')
+    for s in suffix:
+        nums[s] = []
+        fvtk = glob.glob(osp.join(basedir_orig, 'id0', f'*.{s}.vtk'))
+        for f in fvtk:
+            ff = osp.basename(f).split('.')
+            nums[s].append(int(ff[-3]))
+
+        nums[s] = sorted(nums[s])
+        
+    # Range
+    join_vtk_command = dict()
+    if join_vtk_suffix:
+        for s in suffix:
+            num_min = nums[s][0]
+            if osp.exists(osp.join(basedir_new,s)):
+                for num in nums[s]:
+                    if osp.exists(osp.join(basedir_new,s,
+                                           '{0:s}.{1:04d}.{2:s}.vtk'.format(prefix,num,s))):
+                        num_min = num
+            r = r'{0:d}:{1:d}'.format(num_min,nums[s][-1])
+            join_vtk_command[s] = '{0:s} -r {1:s} -i {2:s} -o {3:s} -s {4:s} -C'.format(
+                join_vtk_script,r,basedir_orig,osp.join(basedir_new,s),s)
+        # os.system(join_vtk_command)
+        for k,v in join_vtk_command.items():
+            if k != 'vtk':
+                os.system(v)
+
+    num_min = nums['vtk'][0]
+    for num in nums['vtk']:
+        if osp.exists(osp.join(basedir_new,'vtk',
+                               '{0:s}.{1:04d}.vtk'.format(prefix,num))):
+            num_min = num
+    
+    r = r'{0:d}:{1:d}'.format(num_min,nums['vtk'][-1])
+    join_vtk_command['vtk'] = '{0:s} -r {1:s} -i {2:s} -o {3:s} -C'.format(
+        join_vtk_script,r,basedir_orig,osp.join(basedir_new,'vtk'))
+    os.system(join_vtk_command['vtk'])
+
+if sync_rst:
+    print('##################')
+    print('# rsync rst files')
+    print('##################')
+    os.system(rsync_rst)
+else:
+    print('##################')
+    print('# rsync rst files: only the last two rst files')
+    print('##################')
+    nums = []
+    frst = glob.glob(osp.join(basedir_orig, 'id0', '*.rst'))
+    for f in fvtk:
+        ff = osp.basename(f).split('.')
+        nums.append(int(ff[-2]))
+
+    nums = sorted(nums)
+    rsync_rst = 'rsync -av --include="*.{0:04d}.rst" --exclude="*" {1:s}/id*/ {2:s}'.\
+                                   format(nums[-1], basedir_orig, basedir_new_sub['rst'])
+    os.system(rsync_rst)
+    rsync_rst = 'rsync -av --include="*.{0:04d}.rst" --exclude="*" {1:s}/id*/ {2:s}'.\
+                                   format(nums[-2], basedir_orig, basedir_new_sub['rst'])
+    os.system(rsync_rst)
