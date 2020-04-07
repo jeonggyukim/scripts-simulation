@@ -14,12 +14,14 @@ join_vtk=${join_vtk_c%.*}
 
 usage () {
   cat <<EOM
-  $0 -r <START:END[:STRIDE]> [-b BASENAME] [-i INDIR] [-o OUTDIR] [-V]
-  -b <BASENAME>: Basename of output files, e.g., BASENAME.xxxx.vtk. Default: Same as original files.
-  -i <INDIR>: Directory where vtk files are located (INDIR/id*/). Default: current directory.
+  $0 -r <START:END[:STRIDE]> [-b BASENAME] [-i INDIR] [-o OUTDIR] [-s SUFFIX] [-C] [-V]
+  -b <BASENAME>: Basename (problem_id) of joined vtk files, e.g., BASENAME.xxxx[.SUFFIX].vtk. Default: Same as original.
+  -i <INDIR>: Directory where vtk files are located (INDIR/id*/). Default: Current directory.
               Takes both relative and absolute paths.
-  -o <OUTDIR>: Directory where joined vtk files will be stored. Default: INDIR"
+  -o <OUTDIR>: Directory where joined vtk files will be stored. Default: INDIR
                Takes both relative and absolute paths.
+  -s <SUFFIX>: Suffix (for 2d vtk)
+  -C Compile join_vtk.c file
   -V Produce verbose messages."
 EOM
   exit 0
@@ -28,9 +30,10 @@ EOM
 indir=""
 outdir=""
 outbasename=""
+suffix=""
 compile=0
 verbose=0
-while getopts hb:i:o:r:CV opt
+while getopts hb:i:o:r:s:CV opt
 do
     case "$opt" in
 	h) usage;;
@@ -38,6 +41,7 @@ do
 	i) indir=$OPTARG;;
 	o) outdir=$OPTARG;;
 	r) range=$OPTARG;;
+        s) suffix=$OPTARG;;
 	C) compile=1;;
 	V) verbose=1;;
 	\?) usage;;
@@ -98,19 +102,28 @@ else
     fi
 fi
 
-echo "indir: $indir"
-echo "outdir: $outdir"
-echo 'steps: $(seq -s" " $start $stride $end)'
-echo "nproc: $nproc"
-echo "basename: $basename"
+dotsuffix=""
+if [[ $suffix != "" ]]; then
+  dotsuffix=.${suffix}
+  #[[ -d ${outdir}/${suffix} ]] || mkdir -p ${outdir}/${suffix}
+  #outdir=${outdir}/${suffix}
+fi
+
+echo indir: $indir
+echo outdir: $outdir
+echo steps: $(seq -s" " $start $stride $end)
+echo nproc: $nproc
+echo suffix: $suffix
+echo basename: $basename
 
 for c in $(seq $start $stride $end)
 do
     num=$(printf "%04d" $c)
-    filepattern=${basename}*.${num}.vtk
+    filepattern=${basename}*.${num}${dotsuffix}.vtk
     vtkfiles=( $(find ${indir}/id* -mindepth 1 -name "$filepattern") )
     # echo $num
     # echo $filepattern
-    # echo ${vtkfiles[@]}
-    $join_vtk -o ${outdir}/${outbasename}.${num}.vtk ${vtkfiles[@]}
+    echo ${vtkfiles[@]}
+    echo ${outdir}/${outbasename}.${num}${dotsuffix}.vtk
+    $join_vtk -o ${outdir}/${outbasename}.${num}${dotsuffix}.vtk ${vtkfiles[@]}
 done
