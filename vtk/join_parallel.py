@@ -100,7 +100,8 @@ if __name__ == '__main__':
     print('Hostname: ',hostname)
 
     # C compiled join binary file
-    join = os.path.join(os.path.dirname(__file__),
+    #    join = os.path.join(os.path.dirname(__file__),
+    join = os.path.join('/tigress/jk11/scripts/vtk',
                         'join.sh')
     
     parser = argparse.ArgumentParser()

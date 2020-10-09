@@ -46,7 +46,7 @@ static void write_joined_vtk(const char *out_name);
 static char *my_strdup(const char *in);
 static void free_3d_array(void ***array);
 static void*** calloc_3d_array(size_t nt, size_t nr, size_t nc, size_t size);
-
+static int flag_write;
 
 /* This stores the domain information of each vtk file */
 typedef struct Domain_s{
@@ -458,7 +458,8 @@ static void read_write_scalar(FILE *fp_out){
 	      if((nread = fread(&fdat, sizeof(float), 1, fp)) != 1)
 		join_error("read_write_scalar error\n");
 
-	      fwrite(&fdat, sizeof(float), 1, fp_out);
+              if (flag_write)
+                fwrite(&fdat, sizeof(float), 1, fp_out);
 	    }
 	  }
 	}
@@ -506,7 +507,8 @@ static void read_write_vector(FILE *fp_out){
 	      if((nread = fread(fvec, sizeof(float), 3, fp)) != 3)
 		join_error("read_write_vector error\n");
 
-	      fwrite(fvec, sizeof(float), 3, fp_out);
+              if (flag_write)
+                fwrite(fvec, sizeof(float), 3, fp_out);
 	    }
 	  }
 	}
@@ -654,17 +656,32 @@ static void write_joined_vtk(const char *out_name){
 
     /* Now, every file should agree that we either have SCALARS or
        VECTORS data */
-    fprintf(fp_out,"%s %s %s\n",type,variable,format);
-    if(strcmp(type, "SCALARS") == 0){
-      fprintf(fp_out,"LOOKUP_TABLE default\n");
+    if ((strcmp(variable, "density") == 0) ||
+        (strcmp(variable, "xHI") == 0) ||
+        (strcmp(variable, "xH2") == 0) ||
+        (strcmp(variable, "xe") == 0) ||
+        (strcmp(variable, "cell_centered_B") == 0)) {
+      flag_write = 1;
+    } else {
+      flag_write = 0;      
+    }
+    if (flag_write)
+      fprintf(fp_out,"%s %s %s\n",type,variable,format);
+    
+    if (strcmp(type, "SCALARS") == 0) {
+    if (flag_write)
+      if (flag_write)
+        fprintf(fp_out,"LOOKUP_TABLE default\n");
       read_write_scalar(fp_out);
+      if (flag_write)
+        fprintf(fp_out,"\n",type,variable,format);
     }
-    else if(strcmp(type, "VECTORS") == 0){
+    if (strcmp(type, "VECTORS") == 0) {
       read_write_vector(fp_out);
+      if (flag_write)
+        fprintf(fp_out,"\n",type,variable,format);
     }
-    else
-      join_error("Input type = \"%s\"\n",type);
-    fprintf(fp_out,"\n",type,variable,format);
+
   }
 
   return;

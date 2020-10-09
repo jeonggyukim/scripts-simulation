@@ -2,7 +2,7 @@
 #SBATCH --job-name=join_vtk
 #SBATCH -N 1
 #SBATCH -p shared
-#SBATCH -n 8
+#SBATCH -n 14
 #SBATCH -t 00:30:00
 ##SBATCH --mail-type=begin
 ##SBATCH --mail-type=end
@@ -11,18 +11,16 @@
 #SBATCH --output=join_vtk_%j.out
 #
 
-NPROCS=8
-RANGE="0:161:1"
-BASENAME="R8_2pc_rst"
+NPROCS=14
+RANGE="0:100:1"
+BASENAME="gmc"
 
-INDIR="/scratch/gpfs/jk11/radps_postproc/R8_2pc_rst.xymax2048.eps10"
-OUTDIR="/tigress/${USER}/TIGRESS-DIG/R8_2pc_rst.xymax2048.eps10"
+INDIR="/scratch/gpfs/jk11/GMC/M1E5R20.R.B4.A2.S1.N256"
+OUTDIR="/tigress/${USER}/GMC/M1E5R20.R.B4.A2.S1.N256/vtk"
 
-SCRIPT="/tigress/jk11/scripts/vtk/join_parallel.py"
+SCRIPT="/tigress/${USER}/scripts/vtk/join_parallel.py"
 
-#module load openmpi/gcc/1.8.8/64
-module load intel-mpi # anaconda
-# export PYTHONPATH="$PYTHONPATH:/tigress/jk11/athpy/"
+module load intel-mpi
 
 # Create run directory
 if [ ! -d $OUTDIR ] ; then
